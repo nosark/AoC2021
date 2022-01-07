@@ -1,7 +1,13 @@
 pub mod advent_of_code {
     pub mod problem_one {
         use std::collections::VecDeque;
-        /// TODO: function description
+        /// Function: get_nums_of_increases_by_window_sum(file_path: String, window_size: usize)
+        /// argument: file_path : the file path of the input we consume.
+        /// argument: window_size : the size of the slice we sum.
+        /// This function and reads a file into a string, from there we
+        /// consume the first window_size elements to build our first sum.
+        /// We then compare each sum to its previous (excluding the first window)
+        /// and increment result for each increase.
         pub fn get_num_of_ints_greater_than_previous_int(file_path: String, window_size: usize) -> Result<i64, Box<dyn std::error::Error + 'static>> {
             let mut result = 0;
             let mut current_window_sum = 0;
@@ -10,12 +16,6 @@ pub mod advent_of_code {
             let file_contents: String =  std::fs::read_to_string(file_path).expect("unable to read from file!");
             for line in file_contents.lines() {
                 if sum_queue.len() >= window_size {
-                    // loop through all lines in file
-                    // add all line values until we fill first window
-                    // else we pop the front node and subtract it from the current_window_sum
-                    // and push back the new line and add it to the sum.
-                    // This method saves us from doing redunant additions over and over.
-                 
                     if current_window_sum > previous_sum {
                         result += 1;
                     }
@@ -38,6 +38,61 @@ pub mod advent_of_code {
             }
             
             Ok(result)
+        }
+    }
+
+    pub mod problem_two {
+        struct Submarine {
+            horizontal_pos: i64,
+            depth: i64,
+        }
+
+        struct Command {
+            direction: String,
+            value: i64,
+        }
+
+        impl Submarine {
+            pub fn new() -> Self {
+                Submarine {
+                    horizontal_pos: 0,
+                    depth: 0,
+                }
+            }
+        }
+
+        pub fn get_postional_product(input: String) -> Result<i64, Box<dyn std::error::Error + 'static>> {
+            let mut sub = Submarine::new();
+            let file_contents = std::fs::read_to_string(input).expect("failed to read file for problem two!");
+            for line in file_contents.lines() {
+                let current_command = parse_command(line);
+                // move sub
+                let new_direction = current_command.direction;
+                match new_direction.as_str() {
+                    "forward" => {
+                        sub.horizontal_pos += current_command.value;
+                    }
+                    "down" => {
+                        sub.depth += current_command.value;
+                    }
+
+                    "up" => {
+                        sub.depth -= current_command.value;
+                    }
+
+                    _ => println!("something went wrong while executing command!")
+                }
+            }
+
+            let product = sub.depth * sub.horizontal_pos;
+            Ok(product)
+        }
+
+        fn parse_command(command: &str) -> Command {
+            let variables: Vec<&str> = command.split(' ').collect();
+            let direction = String::from(variables[0]);
+            let value = variables[1].parse().unwrap();
+            Command {direction, value}
         }
     }
 }
@@ -63,7 +118,12 @@ mod tests {
 
     #[test]
     fn advent_problem_one_part_two() {
-        let mut answer = advent_of_code::problem_one::get_num_of_ints_greater_than_previous_int("./resources/testing/problem1-test5.txt".to_string(), 3).expect("failed to retrieve answer for problem one part two!");
+        let answer = advent_of_code::problem_one::get_num_of_ints_greater_than_previous_int("./resources/testing/problem1-test5.txt".to_string(), 3).expect("failed to retrieve answer for problem one part two!");
         assert_eq!(3, answer);
+    }
+    #[test]
+    fn advent_problem_two_part_one() {
+        let answer = advent_of_code::problem_two::get_postional_product("./resources/testing/problem2-test1.txt".to_string()).expect("failed to retrieve answer for problem 2");
+        assert_eq!(150, answer);
     }
 }
