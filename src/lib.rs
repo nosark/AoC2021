@@ -49,6 +49,7 @@ pub mod advent_of_code {
         struct Submarine {
             horizontal_pos: i64,
             depth: i64,
+            aim: i64,
         }
 
         struct Command {
@@ -61,12 +62,14 @@ pub mod advent_of_code {
                 Submarine {
                     horizontal_pos: 0,
                     depth: 0,
+                    aim: 0,
                 }
             }
         }
 
         pub fn get_postional_product(
             input: String,
+            is_using_aim: bool,
         ) -> Result<i64, Box<dyn std::error::Error + 'static>> {
             let mut sub = Submarine::new();
             let file_contents =
@@ -77,14 +80,30 @@ pub mod advent_of_code {
                 let new_direction = current_command.direction;
                 match new_direction.as_str() {
                     "forward" => {
+                        let new_depth = if is_using_aim {
+                            sub.aim * current_command.value
+                        } else {
+                            0
+                        };
+                        sub.depth += new_depth;
                         sub.horizontal_pos += current_command.value;
                     }
                     "down" => {
-                        sub.depth += current_command.value;
+                        sub.depth = if !is_using_aim {
+                            current_command.value + sub.depth
+                        } else {
+                            sub.depth
+                        };
+                        sub.aim += current_command.value;
                     }
 
                     "up" => {
-                        sub.depth -= current_command.value;
+                        sub.depth = if !is_using_aim {
+                            sub.depth - current_command.value
+                        } else {
+                            sub.depth
+                        };
+                        sub.aim -= current_command.value;
                     }
 
                     _ => println!("something went wrong while executing command!"),
@@ -152,12 +171,18 @@ mod tests {
     fn advent_problem_two_part_one() {
         let answer = advent_of_code::problem_two::get_postional_product(
             "./resources/testing/problem2-test1.txt".to_string(),
+            false,
         )
         .expect("failed to retrieve answer for problem 2");
         assert_eq!(150, answer);
     }
-
+    #[test]
     fn advent_of_code_problem_two_part_two() {
-        //
+        let answer = advent_of_code::problem_two::get_postional_product(
+            "./resources/testing/problem2-test1.txt".to_string(),
+            true,
+        )
+        .expect("failed to retrieve answer for problem two part two!");
+        assert_eq!(900, answer);
     }
 }

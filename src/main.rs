@@ -9,6 +9,7 @@ fn main() {
 
     let result_prob_2 = advent_of_code::problem_two::get_postional_product(
         "./resources/problemTwo.txt".to_string(),
+        true,
     )
     .expect("failed to get answer to problem two");
     println!("{}", result_prob_2);
